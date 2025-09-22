@@ -1,8 +1,8 @@
-// app/admin/dashboard/page.jsx
+// app/teacher/dashboard/page.jsx
 "use client";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-export default function AdminDashboard() {
+export default function TeacherDashboard() {
   return (
     <ProtectedRoute allowedRoles={["teacher"]}>
       <div>Teacher Dashboard Content</div>

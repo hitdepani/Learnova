@@ -1,11 +1,11 @@
-// app/admin/dashboard/page.jsx
+// app/institute/dashboard/page.jsx
 "use client";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-export default function AdminDashboard() {
+export default function InstituteDashboard() {
   return (
     <ProtectedRoute allowedRoles={["institute"]}>
-      <div>institute Dashboard Content</div>
+      <div>Institute Dashboard Content</div>
     </ProtectedRoute>
   );
 }
