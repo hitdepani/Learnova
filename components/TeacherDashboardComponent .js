@@ -607,16 +607,16 @@ const TeacherDashboard = () => {
           </div>
 
           {/* Exception Requests */}
-          <div className="bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+          <div className="bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 ms:p-6 p-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="md:text-2xl text-sm font-bold text-white">
                 Exception Requests
               </h2>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center md:space-x-3 space-x-1">
                 <button
                   onClick={fetchAllRequests}
                   disabled={isLoadingRequests}
-                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-lg text-sm transition-colors flex items-center space-x-2 disabled:opacity-50"
+                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 md:px-3 px-1 py-1 rounded-lg text-xs transition-colors flex items-center space-x-2 disabled:opacity-50"
                 >
                   <FileText className="w-4 h-4" />
                   <span>View All</span>
@@ -624,7 +624,7 @@ const TeacherDashboard = () => {
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   )}
                 </button>
-                <span className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm">
+                <span className="bg-red-500/20 text-red-400 md:px-3 px-2 py-1 rounded-full text-xs">
                   {
                     exceptionRequests.filter((req) => req.status === "pending")
                       .length
@@ -1306,7 +1306,7 @@ const TeacherDashboard = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+              className={`flex-1 flex items-center justify-center md:space-x-2 space-x-1 md:px-4 px-2 py-3 rounded-xl font-medium transition-all duration-300 ${
                 activeTab === tab.id
                   ? "bg-gradient-to-r from-accent to-blue-500 text-white shadow-lg"
                   : "text-gray-400 hover:text-white hover:bg-white/5"
