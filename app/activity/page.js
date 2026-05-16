@@ -305,74 +305,7 @@ export default function ActivityPage() {
           </div>
         </section>
 
-        {/* Filters Section */}
-        <section className="px-4 sm:px-6 lg:px-8 mb-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-              <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-white flex items-center">
-                  <Filter className="w-5 h-5 mr-2 text-accent" />
-                  Filter Activities
-                </h3>
-                <div className="flex items-center space-x-2 bg-black/30 rounded-full px-4 py-2 border border-white/10">
-                  <Search className="w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search activities..."
-                    className="bg-transparent text-white placeholder-gray-400 outline-none"
-                  />
-                </div>
-              </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Category Filter */}
-                <div>
-                  <label className="text-sm font-medium text-gray-300 mb-3 block">
-                    Subject Category
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((category) => (
-                      <button
-                        key={category.id}
-                        onClick={() => setSelectedCategory(category.id)}
-                        className={`flex items-center px-4 py-2 rounded-full transition-all duration-300 ${
-                          selectedCategory === category.id
-                            ? "bg-gradient-to-r from-accent to-purple-500 text-white"
-                            : "bg-black/30 text-gray-300 hover:bg-black/50 hover:text-white border border-white/10"
-                        }`}
-                      >
-                        <category.icon className="w-4 h-4 mr-2" />
-                        {category.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Level Filter */}
-                <div>
-                  <label className="text-sm font-medium text-gray-300 mb-3 block">
-                    Education Level
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {levels.map((level) => (
-                      <button
-                        key={level.id}
-                        onClick={() => setSelectedLevel(level.id)}
-                        className={`px-4 py-2 rounded-full transition-all duration-300 ${
-                          selectedLevel === level.id
-                            ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                            : "bg-black/30 text-gray-300 hover:bg-black/50 hover:text-white border border-white/10"
-                        }`}
-                      >
-                        {level.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Featured Activities */}
         <section className="px-4 sm:px-6 lg:px-8 mb-16">
@@ -461,6 +394,73 @@ export default function ActivityPage() {
           </div>
         </section>
 
+        {/* Filters Section */}
+        <section className="px-4 sm:px-6 lg:px-8 mb-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/10">
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-6">
+                <h3 className="text-xl font-semibold text-white flex items-center">
+                  <Filter className="w-5 h-5 mr-2 text-accent" />
+                  Filter Activities
+                </h3>
+                <div className="w-full sm:w-auto flex items-center space-x-2 bg-black/30 rounded-full px-4 py-2 border border-white/10">
+                  <Search className="w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search activities..."
+                    className="bg-transparent text-white placeholder-gray-400 outline-none w-full text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Category Filter */}
+                <div>
+                  <label className="text-sm font-medium text-gray-300 mb-3 block">
+                    Subject Category
+                  </label>
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                    {categories.map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() => setSelectedCategory(category.id)}
+                        className={`flex items-center justify-center px-3 py-2 min-h-[42px] text-xs sm:text-sm rounded-full whitespace-nowrap transition-all duration-300 ${selectedCategory === category.id
+                          ? "bg-gradient-to-r from-accent to-purple-500 text-white"
+                          : "bg-black/30 text-gray-300 hover:bg-black/50 hover:text-white border border-white/10"
+                          }`}
+                      >
+                        <category.icon className="w-4 h-4 mr-2" />
+                        {category.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Level Filter */}
+                <div>
+                  <label className="text-sm font-medium text-gray-300 mb-3 block">
+                    Education Level
+                  </label>
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                    {levels.map((level) => (
+                      <button
+                        key={level.id}
+                        onClick={() => setSelectedLevel(level.id)}
+                        className={`px-4 py-2 rounded-full transition-all duration-300 ${selectedLevel === level.id
+                          ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                          : "bg-black/30 text-gray-300 hover:bg-black/50 hover:text-white border border-white/10"
+                          }`}
+                      >
+                        {level.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* All Activities Grid */}
         <section className="px-4 sm:px-6 lg:px-8 mb-16">
           <div className="max-w-7xl mx-auto">
@@ -501,11 +501,10 @@ export default function ActivityPage() {
                           </span>
                         </div>
                         <span
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            activity.type === "quiz"
-                              ? "bg-blue-500/20 text-blue-300"
-                              : "bg-green-500/20 text-green-300"
-                          }`}
+                          className={`text-xs px-2 py-1 rounded-full ${activity.type === "quiz"
+                            ? "bg-blue-500/20 text-blue-300"
+                            : "bg-green-500/20 text-green-300"
+                            }`}
                         >
                           {activity.type}
                         </span>
