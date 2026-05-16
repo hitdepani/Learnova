@@ -294,7 +294,10 @@ export default function AboutPage() {
         <Navbar />
 
         {/* Hero Section */}
-        <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <section
+          id="hero"
+          className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+        >
           <div
             className="absolute inset-0 opacity-10"
             style={{
@@ -353,7 +356,10 @@ export default function AboutPage() {
         </section>
 
         {/* Mission Section */}
-        <section className="md:py-20 px-4 sm:px-6 lg:px-8 relative">
+        <section
+          id="mission"
+          className="md:py-20 px-4 sm:px-6 lg:px-8 relative"
+        >
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div className="space-y-8">
@@ -421,7 +427,10 @@ export default function AboutPage() {
         </section>
 
         {/* Values Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 relative">
+        <section
+          id="values"
+          className="py-20 px-4 sm:px-6 lg:px-8 relative"
+        >
           <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-purple-900/5 to-black/40 backdrop-blur-3xl" />
 
           <div className="max-w-7xl mx-auto relative">
@@ -472,7 +481,7 @@ export default function AboutPage() {
         </section>
 
         {/* Team Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section id="team" className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-20">
               <SectionBadge
@@ -531,7 +540,10 @@ export default function AboutPage() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <section
+          id="stats"
+          className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+        >
           <div className="absolute inset-0 bg-gradient-to-r from-accent/10 via-purple-500/10 to-pink-500/10 backdrop-blur-3xl">
             <div
               className="absolute inset-0 opacity-30"
@@ -579,7 +591,10 @@ export default function AboutPage() {
         </section>
 
         {/* Impact Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 relative">
+        <section
+          id="impact"
+          className="py-20 px-4 sm:px-6 lg:px-8 relative"
+        >
           <div className="max-w-7xl mx-auto relative">
             <div className="text-center mb-16">
               <SectionBadge icon={Sparkles} text="Our Impact" />
@@ -612,7 +627,7 @@ export default function AboutPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section id="get-started" className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <div className="bg-gradient-to-br from-black/50 to-purple-900/30 rounded-3xl p-12 border border-accent/30 backdrop-blur-xl hover:border-accent/50 transition-all duration-700">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
