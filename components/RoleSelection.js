@@ -3,6 +3,14 @@ import { Sparkles, Shield, Zap } from "lucide-react";
 import { ROLE_CONFIG } from "@/constants/userRoles";
 
 export default function RoleSelection({ onRoleSelect }) {
+  // Keyboard handler — Enter ya Space press hone pe role select hoga
+  const handleKeyDown = (e, role) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault(); // Page scroll rokne ke liye Space key pe
+      onRoleSelect(role);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto text-center">
       <div className="mb-10">
@@ -23,7 +31,8 @@ export default function RoleSelection({ onRoleSelect }) {
             <button
               key={role}
               onClick={() => onRoleSelect(role)}
-              className="group p-4 bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-indigo-500/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-center"
+              onKeyDown={(e) => handleKeyDown(e, role)} // ✅ NEW — keyboard support
+              className="group p-4 bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-indigo-500/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900" // ✅ NEW — focus ring
             >
               <div
                 className={`w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r ${config.color} p-4 group-hover:shadow-lg transition-all duration-300`}
