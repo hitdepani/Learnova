@@ -11,6 +11,7 @@ import AuthForm from "@/components/AuthForm";
 import HeroSection from "@/components/HeroSection";
 import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import toast from "react-hot-toast";
 
 // Services and Utils
 import {
@@ -185,7 +186,7 @@ export default function AuthPage() {
       const result = await resetPassword(emailToReset);
 
       if (result.success) {
-        alert("Password reset email sent! Check your inbox and spam folder.");
+        toast.success("Password reset email sent! Check your inbox and spam folder.");
         setShowForgotPassword(false);
         setForgotPasswordEmail("");
       } else {
