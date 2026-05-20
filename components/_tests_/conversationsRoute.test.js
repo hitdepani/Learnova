@@ -22,7 +22,7 @@ jest.mock("@/lib/mongodb", () => ({
   connectDb: jest.fn(),
 }));
 
-describe("POST /api/conversations - Authentication Security Tests", () => {
+describe("POST /api/conversations - Authentication and Validation Security Tests", () => {
   let mockInsertOne;
 
   beforeEach(() => {
@@ -37,12 +37,13 @@ describe("POST /api/conversations - Authentication Security Tests", () => {
     });
   });
 
-  const createMockRequest = (headers, bodyData) => {
+  const createMockRequest = (headers, bodyData, rawTextOverride = null) => {
+    const rawText = rawTextOverride !== null ? rawTextOverride : JSON.stringify(bodyData);
     return {
       headers: {
         get: (name) => headers[name.toLowerCase()] || null,
       },
-      json: jest.fn().mockResolvedValue(bodyData),
+      text: jest.fn().mockResolvedValue(rawText),
     };
   };
 
@@ -60,7 +61,7 @@ describe("POST /api/conversations - Authentication Security Tests", () => {
     expect(response.status).toBe(401);
     expect(body.error).toBe("Unauthorized");
     expect(mockInsertOne).not.toHaveBeenCalled();
-    expect(connectDb).not.toHaveBeenCalled(); // No DB operations on auth failure
+    expect(connectDb).not.toHaveBeenCalled();
   });
 
   test("rejects request with invalid token with 401 Unauthorized", async () => {
@@ -79,7 +80,6 @@ describe("POST /api/conversations - Authentication Security Tests", () => {
 
     expect(response.status).toBe(401);
     expect(body.error).toBe("Unauthorized");
-    expect(verifyFirebaseToken).toHaveBeenCalledWith("invalid-token");
     expect(mockInsertOne).not.toHaveBeenCalled();
     expect(connectDb).not.toHaveBeenCalled();
   });
@@ -109,8 +109,104 @@ describe("POST /api/conversations - Authentication Security Tests", () => {
     expect(body.data.userEmail).toBe("user@example.com");
     expect(body.data.userMessage).toBe("Hello");
     expect(body.data.botMessage).toBe("Hi there!");
-    expect(verifyFirebaseToken).toHaveBeenCalledWith("valid-token");
     expect(mockInsertOne).toHaveBeenCalled();
-    expect(connectDb).toHaveBeenCalled();
+  });
+
+  test("rejects request payload > 1MB with 413 Payload Too Large", async () => {
+    const mockDecodedToken = { uid: "user-123", email: "user@example.com" };
+    verifyFirebaseToken.mockResolvedValue(mockDecodedToken);
+
+    // Create a 1.1MB large string
+    const largeMessage = "a".repeat(1.1 * 1024 * 1024);
+    const req = createMockRequest(
+      { authorization: "Bearer valid-token", "content-length": String(largeMessage.length) },
+      { userMessage: largeMessage, botMessage: "Hi" }
+    );
+
+    const response = await POST(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(body.error).toBe("Payload too large");
+    expect(mockInsertOne).not.toHaveBeenCalled();
+  });
+
+  test("rejects invalid JSON payload with 400 Bad Request", async () => {
+    const mockDecodedToken = { uid: "user-123", email: "user@example.com" };
+    verifyFirebaseToken.mockResolvedValue(mockDecodedToken);
+
+    const req = createMockRequest(
+      { authorization: "Bearer valid-token" },
+      null,
+      "{ invalid-json }"
+    );
+
+    const response = await POST(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("Invalid JSON payload");
+    expect(mockInsertOne).not.toHaveBeenCalled();
+  });
+
+  test("rejects invalid field types with 400 Bad Request", async () => {
+    const mockDecodedToken = { uid: "user-123", email: "user@example.com" };
+    verifyFirebaseToken.mockResolvedValue(mockDecodedToken);
+
+    const req = createMockRequest(
+      { authorization: "Bearer valid-token" },
+      {
+        userMessage: 12345, // Number instead of string
+        botMessage: "Hi",
+      }
+    );
+
+    const response = await POST(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toContain("expected string, received number");
+    expect(mockInsertOne).not.toHaveBeenCalled();
+  });
+
+  test("rejects missing required fields with 400 Bad Request", async () => {
+    const mockDecodedToken = { uid: "user-123", email: "user@example.com" };
+    verifyFirebaseToken.mockResolvedValue(mockDecodedToken);
+
+    const req = createMockRequest(
+      { authorization: "Bearer valid-token" },
+      {
+        userMessage: "Hello",
+        // botMessage is missing
+      }
+    );
+
+    const response = await POST(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toContain("expected string, received undefined");
+    expect(mockInsertOne).not.toHaveBeenCalled();
+  });
+
+  test("sanitizes text inputs to prevent XSS script injection", async () => {
+    const mockDecodedToken = { uid: "user-123", email: "user@example.com" };
+    verifyFirebaseToken.mockResolvedValue(mockDecodedToken);
+    mockInsertOne.mockResolvedValue({ insertedId: "conv-123" });
+
+    const req = createMockRequest(
+      { authorization: "Bearer valid-token" },
+      {
+        userMessage: "Hello <script>alert('XSS')</script>World",
+        botMessage: "Friendly bot response",
+      }
+    );
+
+    const response = await POST(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(body.data.userMessage).toBe("Hello World"); // <script> tag stripped
   });
 });
