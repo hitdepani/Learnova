@@ -84,3 +84,31 @@ export async function POST(req) {
     return jsonError(err.message || "Failed to save conversation", 500);
   }
 }
+
+export async function GET(request) {
+  try {
+    const authorization = request.headers.get("authorization");
+    const token = authorization?.split(" ")[1];
+
+    const decodedToken = await verifyFirebaseToken(token);
+
+    if (!decodedToken) {
+      return jsonError("Unauthorized", 401);
+    }
+
+    const db = await connectDb();
+    const collection = db.collection("conversations");
+
+    const history = await collection
+      .find({ userId: decodedToken.uid })
+      .sort({ timestamp: 1 })
+      .limit(50)
+      .toArray();
+
+    return jsonSuccess(history);
+  } catch (err) {
+    console.error("Get History Error:", err);
+    return jsonError(err.message || "Failed to retrieve conversation history", 500);
+  }
+}
+
