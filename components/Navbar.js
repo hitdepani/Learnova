@@ -562,7 +562,7 @@ export function Navbar() {
             }
           />
 
-          <div className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-black z-[52] md:hidden border-l border-white/10 shadow-2xl">
+          <div className="fixed top-0 right-0 h-full w-full max-w-[85vw] sm:max-w-sm bg-black z-[52] md:hidden border-l border-white/10 shadow-2xl overflow-x-hidden">
             <div className="p-6 border-b border-white/10 flex justify-between items-center">
               <h2 className="text-white text-lg font-bold">
                 Menu

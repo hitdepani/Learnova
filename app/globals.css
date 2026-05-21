@@ -210,9 +210,14 @@
     @apply border-border outline-ring/50;
   }
 
-  body {
-    @apply bg-background text-foreground;
-  }
+  html,
+body {
+  overflow-x: hidden;
+}
+
+body {
+  @apply bg-background text-foreground;
+}
 }
 
 
