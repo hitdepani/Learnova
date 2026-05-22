@@ -15,21 +15,23 @@ const sanitizeText = (text) => {
 };
 
 const conversationSchema = z.object({
-  userMessage: z.string({
-    required_error: "userMessage is required",
-    invalid_type_error: "userMessage must be a string",
-  })
-  .min(1, "userMessage cannot be empty")
-  .max(10000, "userMessage must not exceed 10,000 characters")
-  .transform(sanitizeText),
+  userMessage: z
+    .string({
+      required_error: "userMessage is required",
+      invalid_type_error: "userMessage must be a string",
+    })
+    .min(1, "userMessage cannot be empty")
+    .max(10000, "userMessage must not exceed 10,000 characters")
+    .transform(sanitizeText),
 
-  botMessage: z.string({
-    required_error: "botMessage is required",
-    invalid_type_error: "botMessage must be a string",
-  })
-  .min(1, "botMessage cannot be empty")
-  .max(10000, "botMessage must not exceed 10,000 characters")
-  .transform(sanitizeText),
+  botMessage: z
+    .string({
+      required_error: "botMessage is required",
+      invalid_type_error: "botMessage must be a string",
+    })
+    .min(1, "botMessage cannot be empty")
+    .max(10000, "botMessage must not exceed 10,000 characters")
+    .transform(sanitizeText),
 });
 
 export const POST = withErrorHandler(async (req) => {

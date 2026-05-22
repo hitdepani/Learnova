@@ -1,6 +1,7 @@
 import { connectDb } from "@/lib/mongodb";
 import { verifyFirebaseToken } from "@/lib/firebase-admin";
 import { jsonError, jsonSuccess } from "@/lib/api-response";
+import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
@@ -10,12 +11,9 @@ export async function POST(request) {
     const authResult = await verifyFirebaseToken(token);
 
     if (!authResult.valid) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-          reason: authResult.reason,
-        },
-        { status: 401 }
+      return jsonError(
+        { message: "Unauthorized", reason: authResult.reason },
+        401
       );
     }
 
@@ -57,7 +55,6 @@ export async function POST(request) {
       201,
     );
   } catch (error) {
-    console.error("Exception creation error:", error);
     return jsonError("Internal server error", 500);
   }
 }

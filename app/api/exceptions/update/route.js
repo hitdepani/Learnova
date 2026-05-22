@@ -52,7 +52,42 @@ export const PUT = withErrorHandler(async (request) => {
 
   const db = await connectDb();
 
-  let result;
+    // Fetch the exception to perform ownership/relationship checks to prevent IDOR
+    const exception = await db.collection("exceptions").findOne({ _id: new ObjectId(exceptionId) });
+
+    if (!exception) {
+      return jsonError("Exception not found", 404);
+    }
+
+    // Perform teacher-specific assignment validation (CWE-639 resolution)
+    if (profile.role === "teacher") {
+      const teacherSubjects = profile.subjects || [];
+      const exceptionClass = exception.className || exception.class;
+      let isAuthorized = false;
+
+      // 1. Check if the teacher teaches the class of the exception
+      if (exceptionClass && teacherSubjects.includes(exceptionClass)) {
+        isAuthorized = true;
+      }
+
+      // 2. Fallback: Check student-teacher subject assignment overlap
+      if (!isAuthorized && exception.studentEmail) {
+        const studentProfile = await getUserProfileByEmail(exception.studentEmail);
+        if (studentProfile) {
+          const studentSubjects = studentProfile.subjects || studentProfile.classes || [];
+          const hasOverlap = studentSubjects.some((subject) => teacherSubjects.includes(subject));
+          if (hasOverlap) {
+            isAuthorized = true;
+          }
+        }
+      }
+
+      if (!isAuthorized) {
+        return jsonError("Forbidden: You are not authorized to update exception requests for this class/student.", 403);
+      }
+    }
+
+     let result;
   try {
     result = await db.collection("exceptions").updateOne(
       { _id: new ObjectId(exceptionId) },
