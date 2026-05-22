@@ -137,7 +137,10 @@ export default function AuthPage() {
   };
 
   const handleGoogleLogin = async () => {
+    console.log("🔴 Google button clicked. Selected role:", selectedRole);
+
     if (!selectedRole) {
+      console.warn("⚠️ Google login attempted without role selection");
       setErrors({ role: "Please select your role first" });
       return;
     }
@@ -148,6 +151,7 @@ export default function AuthPage() {
       selectedRole === USER_ROLES.INSTITUTE &&
       !instituteName.trim()
     ) {
+      console.warn("⚠️ Google signup attempted for institute without name");
       setErrors({ instituteName: "Institute name is required" });
       return;
     }
@@ -156,20 +160,24 @@ export default function AuthPage() {
     setErrors({});
 
     try {
+      console.log("🟡 Calling loginWithGoogle service...");
       const result = await loginWithGoogle(selectedRole, isLogin, {
         fullName,
         instituteName,
       });
+      console.log("🟢 Google auth result:", result);
 
       if (result.success) {
+        console.log("✅ Google login successful, redirecting...");
         toast.success("Successfully logged in with Google!");
         redirectBasedOnRole(result.userData.role, router);
       } else {
+        console.error("❌ Google login failed:", result.error);
         toast.error(result.error || "Google authentication failed.");
         setErrors({ submit: result.error });
       }
     } catch (err) {
-      console.error("Google auth error:", err);
+      console.error("❌ Google auth error:", err);
       toast.error("An unexpected error occurred. Please try again.");
       setErrors({ submit: "An unexpected error occurred. Please try again." });
     } finally {

@@ -151,8 +151,11 @@ export const loginWithGoogle = async (
 ) => {
   try {
     if (!auth || !db) {
+      console.error("❌ Google Auth Failed: Firebase not initialized. Check console for details.");
       return { success: false, error: FIREBASE_CONFIG_ERROR };
     }
+
+    console.log("🔵 Starting Google OAuth flow for role:", selectedRole);
 
     const provider = new GoogleAuthProvider();
     const userCredential = await signInWithPopup(auth, provider);

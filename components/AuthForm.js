@@ -326,6 +326,7 @@ export default function AuthForm({
           </div>
 
           <button
+            type="button"
             onClick={onGoogleLogin}
             disabled={isLoading}
             className="mt-4 w-full bg-muted border border-border text-foreground py-3 px-4 rounded-xl font-medium hover:bg-muted/80 focus:ring-4 focus:ring-gray-500/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
