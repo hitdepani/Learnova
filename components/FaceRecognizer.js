@@ -25,6 +25,8 @@ export default function FaceRecognizer({ authUser }) {
   const [confidence, setConfidence] = useState(0);
   const [attendanceState, setAttendanceState] = useState("idle");
 
+  const faceMatcherRef = useRef(null);
+
   const MODEL_URL = "/models";
 
   // Use labels directly from MongoDB with full image URL
@@ -39,7 +41,7 @@ export default function FaceRecognizer({ authUser }) {
         videoRef.current.onloadedmetadata = () => {
           videoRef.current.play();
           setIsLoading(false);
-          runDetection();
+          matchCurrentFrame();
         };
       }
       setMessage("Camera access granted ✅");
@@ -90,8 +92,11 @@ export default function FaceRecognizer({ authUser }) {
           videoRef.current.onloadedmetadata = () => {
             videoRef.current.play();
             setIsLoading(false);
-            setMessage("Camera active. Looking for faces...");
-            runDetection(); // Start recognition loop
+            setMessage("Camera active. Building face models...");
+            buildFaceMatcher().then(() => {
+              setMessage("Camera active. Looking for faces...");
+              matchCurrentFrame();
+            });
           };
         }
       } catch (err) {
@@ -117,20 +122,14 @@ export default function FaceRecognizer({ authUser }) {
     // Only run when labels have loaded
   }, [labelsLoading, error]);
 
-  const runDetection = async () => {
-    if (
-      !videoRef.current ||
-      !canvasRef.current ||
-      !labels ||
-      labels.length === 0
-    )
-      return;
+  const buildFaceMatcher = async () => {
+    if (!labels || labels.length === 0) return;
 
     const labeledFaceDescriptors = (
       await Promise.all(
         labels.map(async (student) => {
           try {
-            const img = await faceapi.fetchImage(student.image); // full URL from MongoDB
+            const img = await faceapi.fetchImage(student.image);
             const detection = await faceapi
               .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
               .withFaceLandmarks()
@@ -155,7 +154,12 @@ export default function FaceRecognizer({ authUser }) {
       return;
     }
 
-    const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+    faceMatcherRef.current = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+  };
+
+  const matchCurrentFrame = async () => {
+    if (!videoRef.current || !canvasRef.current || !faceMatcherRef.current) return;
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
@@ -178,7 +182,7 @@ export default function FaceRecognizer({ authUser }) {
 
     if (resizedDetections.length > 0) {
       const face = resizedDetections[0];
-      const bestMatch = faceMatcher.findBestMatch(face.descriptor);
+      const bestMatch = faceMatcherRef.current.findBestMatch(face.descriptor);
       const label = bestMatch.label === "unknown" ? "Unknown" : bestMatch.label;
       const confidenceScore = Math.round((1 - bestMatch.distance) * 100);
 
@@ -198,7 +202,7 @@ export default function FaceRecognizer({ authUser }) {
         box.x + box.width / 2,
         box.y - 8
       );
- 
+
       setMessage(`Detected: ${label}`);
       setConfidence(confidenceScore);
 
