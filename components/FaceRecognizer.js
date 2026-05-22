@@ -18,6 +18,10 @@ export default function FaceRecognizer({ authUser }) {
   const retryStreamRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  
+  // FIX: Added ref to cache descriptors and prevent massive re-fetching on retries
+  const cachedDescriptorsRef = useRef(null); 
+
   const {
     labels: fetchedLabels,
     loading: labelsLoading,
@@ -139,40 +143,49 @@ export default function FaceRecognizer({ authUser }) {
     )
       return;
 
-    const labeledFaceDescriptors = (
-      await Promise.all(
-        labels.map(async (student) => {
-          try {
-            const token = await authUser?.getIdToken();
-            const res = await fetch(`/api/images?id=${student._id}`, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+    // FIX: Check if descriptors are already cached in memory
+    let labeledFaceDescriptors = cachedDescriptorsRef.current;
 
-            if (!res.ok) {
-              console.warn(`Could not load image for ${student.name}: ${res.status}`);
-              return null;
+    // FIX: Only fetch and compute ML models if they haven't been processed yet
+    if (!labeledFaceDescriptors) {
+      labeledFaceDescriptors = (
+        await Promise.all(
+          labels.map(async (student) => {
+            try {
+              const token = await authUser?.getIdToken();
+              const res = await fetch(`/api/images?id=${student._id}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
+
+              if (!res.ok) {
+                console.warn(`Could not load image for ${student.name}: ${res.status}`);
+                return null;
+              }
+
+              const blob = await res.blob();
+              const img = await faceapi.env.getEnv().createImageFromBlob(blob);
+
+              const detection = await faceapi
+                .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+              if (detection) {
+                return new faceapi.LabeledFaceDescriptors(student.name, [
+                  detection.descriptor,
+                ]);
+              }
+            } catch {
+              // Image not found for student
             }
+            return null;
+          }),
+        )
+      ).filter(Boolean);
 
-            const blob = await res.blob();
-            const img = await faceapi.env.getEnv().createImageFromBlob(blob);
-
-            const detection = await faceapi
-              .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
-              .withFaceLandmarks()
-              .withFaceDescriptor();
-
-            if (detection) {
-              return new faceapi.LabeledFaceDescriptors(student.name, [
-                detection.descriptor,
-              ]);
-            }
-          } catch {
-            // Image not found for student
-          }
-          return null;
-        }),
-      )
-    ).filter(Boolean);
+      // FIX: Save the computed descriptors to the ref to avoid N+1 API calls on retry
+      cachedDescriptorsRef.current = labeledFaceDescriptors;
+    }
 
     if (!labeledFaceDescriptors.length) {
       if (isMounted.current) {
