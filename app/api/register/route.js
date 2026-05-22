@@ -21,6 +21,8 @@ import {
 
 import { z } from "zod";
 
+import { checkRateLimit } from "@/lib/rateLimit";
+
 if (
   typeof global !== "undefined" &&
   !global.mockFile
@@ -33,13 +35,7 @@ if (
   };
 }
 
-export const rateLimitMap =
-  new Map();
 
-const RATE_LIMIT_WINDOW =
-  60 * 1000;
-
-const MAX_ATTEMPTS = 5;
 
 const MAX_FILE_SIZE =
   5 * 1024 * 1024;
@@ -197,49 +193,11 @@ export const POST =
   withErrorHandler(
     async (req) => {
       // Rate limiting
-      const ip =
-        req.headers.get(
-          "x-forwarded-for"
-        ) || "127.0.0.1";
+      const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+      const rateLimitResult = await checkRateLimit(`register_ip_${ip}`);
 
-      const now = Date.now();
-
-      if (
-        !rateLimitMap.has(ip)
-      ) {
-        rateLimitMap.set(
-          ip,
-          []
-        );
-      }
-
-      const attempts =
-        rateLimitMap
-          .get(ip)
-          .filter(
-            (
-              timestamp
-            ) =>
-              now -
-                timestamp <
-              RATE_LIMIT_WINDOW
-          );
-
-      attempts.push(now);
-
-      rateLimitMap.set(
-        ip,
-        attempts
-      );
-
-      if (
-        attempts.length >
-        MAX_ATTEMPTS
-      ) {
-        throw new AppError(
-          "Too many registration attempts. Please try again later.",
-          429
-        );
+      if (!rateLimitResult.allowed) {
+        throw new AppError("Too many registration attempts. Please try again later.", 429);
       }
 
       // Authenticate

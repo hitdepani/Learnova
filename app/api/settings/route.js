@@ -118,11 +118,26 @@ export const PATCH = withErrorHandler(async (request) => {
     isOperatorAdmin = true;
   }
 
+  const flattenObject = (obj, prefix = "") => {
+    return Object.keys(obj).reduce((acc, k) => {
+      const pre = prefix.length ? prefix + "." : "";
+      if (typeof obj[k] === "object" && obj[k] !== null && !Array.isArray(obj[k])) {
+        Object.assign(acc, flattenObject(obj[k], pre + k));
+      } else {
+        acc[pre + k] = obj[k];
+      }
+      return acc;
+    }, {});
+  };
+
+  const updatePayload = flattenObject(settings);
+  updatePayload.updatedAt = new Date();
+
   const db = await connectDb();
 
   await db.collection("settings").updateOne(
     { userId: targetUserId },
-    { $set: { ...settings, updatedAt: new Date() } },
+    { $set: updatePayload },
     { upsert: true }
   );
 
