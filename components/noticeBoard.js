@@ -187,11 +187,22 @@ const SmartNoticeBoard = () => {
       setNotices(userRelevantNotices);
       setLoading(false);
 
-      // Load read notices from localStorage
+      // Load read notices from localStorage (defensive parsing)
       const userId = getUserId();
       const savedReadNotices = localStorage.getItem(`readNotices_${userId}`);
       if (savedReadNotices) {
-        setReadNotices(new Set(JSON.parse(savedReadNotices)));
+        try {
+          const parsed = JSON.parse(savedReadNotices);
+          if (Array.isArray(parsed)) {
+            setReadNotices(new Set(parsed));
+          } else {
+            // If stored value is malformed, remove it
+            localStorage.removeItem(`readNotices_${userId}`);
+          }
+        } catch (err) {
+          console.error("Failed to parse read notices from localStorage:", err);
+          localStorage.removeItem(`readNotices_${userId}`);
+        }
       }
     } else {
       setLoading(false);
