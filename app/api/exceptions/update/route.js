@@ -15,8 +15,12 @@ export const PUT = withErrorHandler(async (request) => {
   const body = await request.json();
   const { exceptionId, status, comments } = body;
 
-  if (!exceptionId || !ObjectId.isValid(exceptionId)) {
-    throw new ValidationError("Invalid or missing exception ID");
+  if (!exceptionId) {
+    throw new ValidationError("exceptionId is required");
+  }
+
+  if (!ObjectId.isValid(exceptionId)) {
+    throw new ValidationError("Invalid exception ID");
   }
 
   const trimmedStatus = typeof status === "string" ? status.trim() : "";
