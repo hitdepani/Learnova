@@ -82,7 +82,7 @@ describe("GET /api/labels - Security & Authentication Tests", () => {
     const body = await response.json();
 
     expect(response.status).toBe(401);
-    expect(body.error).toBe("Unauthorized");
+    expect(body.error).toBe("Unauthorized: No token provided");
     expect(connectDb).not.toHaveBeenCalled();
   });
 
@@ -93,7 +93,8 @@ describe("GET /api/labels - Security & Authentication Tests", () => {
     const body = await response.json();
 
     expect(response.status).toBe(401);
-    expect(body.error).toBe("Unauthorized");
+    expect(body.error.message).toBe("Unauthorized");
+    expect(body.error.reason).toBe("invalid_token");
     expect(connectDb).not.toHaveBeenCalled();
   });
 
