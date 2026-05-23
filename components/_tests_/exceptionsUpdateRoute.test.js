@@ -1,6 +1,6 @@
-import { PUT } from "@/app/api/exceptions/update/route";
 import { connectDb } from "@/lib/mongodb";
 import { verifyFirebaseToken, getUserProfile, getUserProfileByEmail } from "@/lib/firebase-admin";
+
 class ObjectId {
   constructor(id) {
     this.id = id;
@@ -8,7 +8,26 @@ class ObjectId {
   toString() {
     return this.id;
   }
+  static isValid(id) {
+    return typeof id === "string" && id.length === 24;
+  }
 }
+
+jest.mock("mongodb", () => ({
+  ObjectId: class {
+    constructor(id) {
+      this.id = id;
+    }
+    toString() {
+      return this.id;
+    }
+    static isValid(id) {
+      return typeof id === "string" && id.length === 24;
+    }
+  }
+}));
+
+import { PUT } from "@/app/api/exceptions/update/route";
 jest.mock("next/server", () => ({
   NextResponse: {
     json: jest.fn().mockImplementation((body, init) => {
