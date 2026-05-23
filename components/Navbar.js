@@ -217,10 +217,10 @@ export function Navbar() {
                 <BookOpen className="h-6 w-6 text-white" />
               </div>
               <div>
-                <span className="text-xl font-bold text-gray-950 dark:text-white">
+                <span className="text-xl font-bold text-slate-900 dark:text-slate-50">
                   Learnova
                 </span>
-                <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider font-semibold">
+                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">
                   Premium
                 </p>
               </div>
@@ -236,8 +236,8 @@ export function Navbar() {
                     href={item.href}
                     className={`px-4 py-2 rounded-lg transition-all duration-300 ${
                       isActive
-                        ? "bg-accent/20 text-gray-950 dark:text-white font-medium"
-                        : "text-gray-700 dark:text-gray-200 hover:text-gray-950 dark:hover:text-white hover:bg-accent/10"
+                        ? "bg-accent/20 text-slate-900 dark:text-white font-bold"
+                        : "text-slate-600 dark:text-slate-300 hover:text-accent dark:hover:text-accent hover:bg-accent/10 font-semibold"
                     }`}
                   >
                     {item.label}
@@ -532,8 +532,8 @@ export function Navbar() {
                       onClick={() => setIsMenuOpen(false)}
                       className="flex items-center px-4 py-3 hover:bg-accent/10 transition-colors rounded-xl group"
                     >
-                      <item.icon className="h-5 w-5 mr-4 text-muted-foreground group-hover:text-accent transition-colors" />
-                      <span className="font-medium">{item.label}</span>
+                      <item.icon className="h-5 w-5 mr-4 text-slate-500 dark:text-slate-400 group-hover:text-accent transition-colors" />
+                      <span className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-accent transition-colors">{item.label}</span>
                     </Link>
                   ))}
                 </div>
