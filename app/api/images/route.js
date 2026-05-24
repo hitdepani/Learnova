@@ -5,13 +5,22 @@ import { withErrorHandler } from "@/lib/error-handler";
 import { AppError, ValidationError, NotFoundError } from "@/lib/errors";
 import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
+import { z } from "zod";
+
+export const dynamic = "force-dynamic";
+
+const getImageSchema = z.object({
+  id: z.string().min(1, "Missing user id parameter"),
+});
 
 export const GET = withErrorHandler(async (request) => {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
-    if (!id) {
-      throw new ValidationError("Missing user id parameter");
+    const validation = getImageSchema.safeParse({ id });
+    if (!validation.success) {
+      const firstError = validation.error.issues?.[0]?.message || "Invalid request parameter";
+      throw new ValidationError(firstError);
     }
 
     await requireAuth(request);

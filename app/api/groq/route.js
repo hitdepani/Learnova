@@ -1,6 +1,7 @@
 import { jsonSuccess, jsonError } from "@/lib/api-response";
 import { authenticateRequest } from "@/lib/error-handler";
-import { AppError } from "@/lib/errors";
+import { AppError, ValidationError } from "@/lib/errors";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,27 @@ const GROQ_API_URL =
   "https://api.groq.com/openai/v1/chat/completions";
 
 import { checkRateLimit } from "@/lib/rateLimit";
+
+const groqSchema = z.object({
+  message: z.string().optional(),
+  userMessage: z.string().optional(),
+}).refine(
+  (data) => {
+    const message = data.message || data.userMessage;
+    return message && message.trim().length > 0;
+  },
+  {
+    message: "Message is required",
+  }
+).refine(
+  (data) => {
+    const message = data.message || data.userMessage;
+    return message && message.trim().length <= 2000;
+  },
+  {
+    message: "Message too long (max 2000 characters)",
+  }
+);
 
 export async function POST(request) {
   try {
@@ -26,28 +48,17 @@ export async function POST(request) {
     // Parse body
     const body = await request.json();
 
+    const validation = groqSchema.safeParse(body);
+    if (!validation.success) {
+      const firstError = validation.error.issues?.[0]?.message || "Invalid request payload";
+      throw new ValidationError(firstError);
+    }
+
     const rawMessage =
-      typeof body.message === "string"
-        ? body.message
-        : body.userMessage;
+      validation.data.message ||
+      validation.data.userMessage;
 
-    const trimmedMessage =
-      rawMessage?.trim();
-
-    if (!trimmedMessage) {
-      return jsonError(
-        "Message is required",
-        400
-      );
-    }
-
-    // Validate length
-    if (trimmedMessage.length > 2000) {
-      return jsonError(
-        "Message too long",
-        400
-      );
-    }
+    const trimmedMessage = rawMessage.trim();
 
     // API key
     const apiKey =
