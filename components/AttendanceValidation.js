@@ -21,6 +21,7 @@ const AttendanceValidation = ({ onValidationSuccess }) => {
   const [location, setLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
   const [timeValid, setTimeValid] = useState(false);
+  const [countdownText, setCountdownText] = useState("");
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -77,6 +78,56 @@ const AttendanceValidation = ({ onValidationSuccess }) => {
       currentTime >= timeWindow.start && currentTime <= timeWindow.end;
     setTimeValid(isValidTime);
   };
+
+  // Live countdown timer for the attendance window
+  useEffect(() => {
+    if (!settings?.timeWindow) return;
+
+    const updateTimer = () => {
+      const { start, end } = settings.timeWindow;
+      const now = new Date();
+      
+      // Parse start and end times today
+      const [startH, startM] = start.split(":").map(Number);
+      const [endH, endM] = end.split(":").map(Number);
+
+      const startTime = new Date(now);
+      startTime.setHours(startH, startM, 0, 0);
+
+      const endTime = new Date(now);
+      endTime.setHours(endH, endM, 0, 0);
+
+      // Check current validity
+      const isValid = now >= startTime && now <= endTime;
+      setTimeValid(isValid);
+
+      if (now < startTime) {
+        // Window is not open yet
+        const diffMs = startTime - now;
+        const h = Math.floor(diffMs / 3600000);
+        const m = Math.floor((diffMs % 3600000) / 60000);
+        const s = Math.floor((diffMs % 60000) / 1000);
+        const pad = (n) => String(n).padStart(2, "0");
+        setCountdownText(`Opens in ${pad(h)}h ${pad(m)}m ${pad(s)}s`);
+      } else if (now >= startTime && now <= endTime) {
+        // Window is open
+        const diffMs = endTime - now;
+        const h = Math.floor(diffMs / 3600000);
+        const m = Math.floor((diffMs % 3600000) / 60000);
+        const s = Math.floor((diffMs % 60000) / 1000);
+        const pad = (n) => String(n).padStart(2, "0");
+        setCountdownText(`Closes in ${pad(h)}h ${pad(m)}m ${pad(s)}s`);
+      } else {
+        // Window has expired
+        setCountdownText("Closed");
+      }
+    };
+
+    updateTimer(); // run immediately
+    const intervalId = setInterval(updateTimer, 1000); // update every second
+
+    return () => clearInterval(intervalId);
+  }, [settings]);
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3;
@@ -436,6 +487,18 @@ const AttendanceValidation = ({ onValidationSuccess }) => {
                     ? `✅ Perfect timing! Valid window: ${settings.timeWindow.start} - ${settings.timeWindow.end}`
                     : `⏰ Outside time window. Valid hours: ${settings.timeWindow.start} - ${settings.timeWindow.end}`}
                 </p>
+                {countdownText && (
+                  <div
+                    className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider ${
+                      timeValid
+                        ? "bg-green-500/20 text-green-300 border border-green-500/30 animate-pulse"
+                        : "bg-red-500/20 text-red-300 border border-red-500/30"
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{countdownText}</span>
+                  </div>
+                )}
               </div>
               {timeValid ? (
                 <CheckCircle className="w-8 h-8 text-green-500" />
