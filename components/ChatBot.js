@@ -438,8 +438,8 @@ const LearnovaChatbot = () => {
   // ---------------------------------------------------------------------------
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 flex flex-col ${t.bg} rounded-xl shadow-2xl transition-all duration-300 border ${t.border} ${
-        isMinimized ? "w-72 h-16 overflow-hidden" : "w-96 h-[660px]"
+      className={`fixed z-50 flex flex-col ${t.bg} shadow-2xl transition-all duration-300 border ${t.border} ${
+        isMinimized ? "bottom-6 right-6 w-72 h-16 overflow-hidden rounded-xl" : "bottom-0 right-0 w-full h-full rounded-none sm:bottom-6 sm:right-6 sm:w-96 sm:h-[660px] sm:rounded-xl"
       }`}
     >
       {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -467,8 +467,8 @@ const LearnovaChatbot = () => {
           <button onClick={() => setIsMinimized(!isMinimized)} className="hover:bg-white/20 p-2 rounded-lg transition-colors" title={isMinimized ? "Expand" : "Minimize"}>
             {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
           </button>
-          <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 p-2 rounded-lg transition-colors" title="Close">
-            <X size={16} />
+          <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 p-2 sm:p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" title="Close" aria-label="Close chat">
+            <X size={20} className="sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
