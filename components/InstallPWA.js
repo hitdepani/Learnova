@@ -34,21 +34,27 @@ export default function InstallPWA() {
       // Silently handle localStorage errors
     }
 
+    let timeoutId = null;
+
     const handler = (e) => {
       e.preventDefault();
       setInstallPrompt(e);
-      setTimeout(() => setIsVisible(true), 5000);
+      timeoutId = setTimeout(() => setIsVisible(true), 5000);
+    };
+
+    const appInstalledHandler = () => {
+      setIsInstalled(true);
+      setIsVisible(false);
     };
 
     window.addEventListener("beforeinstallprompt", handler);
 
-    window.addEventListener("appinstalled", () => {
-      setIsInstalled(true);
-      setIsVisible(false);
-    });
+    window.addEventListener("appinstalled", appInstalledHandler);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", appInstalledHandler);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 
