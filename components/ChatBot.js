@@ -447,8 +447,6 @@ const LearnovaChatbot = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true); // This is the only one we need!
-  const [messages, setMessages] = useState(() => [INITIAL_MESSAGE]);
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -587,12 +585,6 @@ const LearnovaChatbot = () => {
     bg: isDarkMode 
       ? "bg-gray-950/90 backdrop-blur-xl text-white" 
       : "bg-white/95 backdrop-blur-xl text-gray-900",
-    header: "bg-gradient-to-r from-purple-700 via-blue-700 to-indigo-700",
-    border: isDarkMode ? "border-gray-700" : "border-gray-200",
-  const t = {
-    bg: isDarkMode 
-      ? "bg-gray-950/90 backdrop-blur-xl text-white" 
-      : "bg-white/95 backdrop-blur-xl text-gray-900",
     header: "bg-gradient-to-r from-purple-700 via-indigo-700 to-blue-700 border-b border-white/10 shadow-lg shadow-purple-950/20",
     border: isDarkMode ? "border-white/10" : "border-gray-200/80",
     botMsg: isDarkMode
@@ -643,9 +635,7 @@ const LearnovaChatbot = () => {
   // ---------------------------------------------------------------------------
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 flex flex-col ${themeTokens.bg} rounded-xl shadow-2xl transition-all duration-300 border ${themeTokens.border} ${
-        isMinimized ? "w-72 h-16 overflow-hidden" : "w-96 h-[660px]"
-      className={`fixed z-50 flex flex-col ${t.bg} shadow-2xl transition-all duration-300 border ${t.border} ${
+      className={`fixed z-50 flex flex-col ${themeTokens.bg} shadow-2xl transition-all duration-300 border ${themeTokens.border} ${
         isMinimized ? "bottom-6 right-6 w-72 h-16 overflow-hidden rounded-xl" : "bottom-0 right-0 w-full h-full rounded-none sm:bottom-6 sm:right-6 sm:w-96 sm:h-[660px] sm:rounded-xl"
       }`}
     >
