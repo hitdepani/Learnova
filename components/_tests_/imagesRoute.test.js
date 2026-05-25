@@ -66,13 +66,13 @@ describe("GET /api/images - authorization", () => {
     const userDoc = { image: "https://public.blob.vercel-storage.com/a.jpg", firebaseUid: "owner-uid" };
     connectDb.mockResolvedValue({ collection: () => ({ findOne: jest.fn().mockResolvedValue(userDoc) }) });
 
-    global.fetch.mockResolvedValue({ ok: true, headers: { get: () => "image/jpeg" }, arrayBuffer: async () => Buffer.from([1, 2, 3]).buffer });
+    global.fetch.mockResolvedValue({ ok: true, headers: { get: jest.fn((name) => { if (name === "content-type") return "image/jpeg"; if (name === "content-length") return "3"; return null; }) }, body: {} });
 
     const req = createReq("someObjectId");
     const res = await GET(req);
 
     expect(res.status).toBe(200);
-    expect(global.fetch).toHaveBeenCalledWith(userDoc.image);
+    expect(global.fetch).toHaveBeenCalledWith(userDoc.image, expect.objectContaining({ signal: expect.any(Object) }));
   });
 
   test("non-owner without privileges is forbidden", async () => {
@@ -94,13 +94,13 @@ describe("GET /api/images - authorization", () => {
     const userDoc = { image: "https://public.blob.vercel-storage.com/a.jpg", firebaseUid: "owner-uid" };
     connectDb.mockResolvedValue({ collection: () => ({ findOne: jest.fn().mockResolvedValue(userDoc) }) });
 
-    global.fetch.mockResolvedValue({ ok: true, headers: { get: () => "image/png" }, arrayBuffer: async () => Buffer.from([4,5,6]).buffer });
+    global.fetch.mockResolvedValue({ ok: true, headers: { get: jest.fn((name) => { if (name === "content-type") return "image/png"; if (name === "content-length") return "3"; return null; }) }, body: {} });
 
     const req = createReq("someObjectId");
     const res = await GET(req);
 
     expect(res.status).toBe(200);
-    expect(global.fetch).toHaveBeenCalledWith(userDoc.image);
+    expect(global.fetch).toHaveBeenCalledWith(userDoc.image, expect.objectContaining({ signal: expect.any(Object) }));
   });
 
   test("invalid id parameter results in validation error", async () => {

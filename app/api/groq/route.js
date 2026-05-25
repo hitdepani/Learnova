@@ -1,5 +1,5 @@
 import { jsonSuccess, jsonError } from "@/lib/api-response";
-import { authenticateRequest } from "@/lib/error-handler";
+import { authenticateRequest, parseJSON } from "@/lib/error-handler";
 import { AppError, ValidationError } from "@/lib/errors";
 import { z } from "zod";
 
@@ -14,8 +14,16 @@ import { detectInjection, sanitizeMessage, buildSecureMessages } from "@/utils/p
 const groqSchema = z.object({
   message: z.string().optional(),
   userMessage: z.string().optional(),
+  messages: z.array(z.object({
+    role: z.string(),
+    content: z.string()
+  })).optional(),
 }).refine(
   (data) => {
+    if (data.messages && data.messages.length > 0) {
+      const lastMsg = data.messages[data.messages.length - 1];
+      return lastMsg.content && lastMsg.content.trim().length > 0;
+    }
     const message = data.message || data.userMessage;
     return message && message.trim().length > 0;
   },
@@ -24,6 +32,10 @@ const groqSchema = z.object({
   }
 ).refine(
   (data) => {
+    if (data.messages && data.messages.length > 0) {
+      const lastMsg = data.messages[data.messages.length - 1];
+      return lastMsg.content && lastMsg.content.trim().length <= 2000;
+    }
     const message = data.message || data.userMessage;
     return message && message.trim().length <= 2000;
   },
@@ -47,7 +59,7 @@ export async function POST(request) {
     }
 
     // Parse body
-    const body = await request.json();
+    const body = await parseJSON(request, 1024 * 10);
 
     const validation = groqSchema.safeParse(body);
     if (!validation.success) {
@@ -55,9 +67,16 @@ export async function POST(request) {
       throw new ValidationError(firstError);
     }
 
-    const rawMessage =
-      validation.data.message ||
-      validation.data.userMessage;
+    let rawMessage = "";
+    let history = [];
+
+    if (validation.data.messages && validation.data.messages.length > 0) {
+      const lastMsg = validation.data.messages[validation.data.messages.length - 1];
+      rawMessage = lastMsg.content;
+      history = validation.data.messages.slice(0, -1);
+    } else {
+      rawMessage = validation.data.message || validation.data.userMessage;
+    }
 
     const trimmedMessage = rawMessage.trim();
 
@@ -113,7 +132,8 @@ export async function POST(request) {
             model: "llama-3.1-8b-instant",
             messages: buildSecureMessages(
               sanitizedMessage,
-              "You are Nova, the friendly AI assistant for Learnova - a Smart Student Engagement Ecosystem."
+              "You are Nova, the friendly AI assistant for Learnova - a Smart Student Engagement Ecosystem.",
+              history
             ),
             max_tokens: 400,
             temperature: 0.7,

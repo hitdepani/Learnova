@@ -1,8 +1,9 @@
+import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/mongodb";
 import { jsonSuccess } from "@/lib/api-response";
 import { z } from "zod";
 import xss from "xss";
-import { withErrorHandler } from "@/lib/error-handler";
+import { withErrorHandler, parseJSON } from "@/lib/error-handler";
 import { requireAuth } from "@/lib/rbac";
 import { AppError, ValidationError } from "@/lib/errors";
 import { checkRateLimit } from "@/lib/rateLimit";
@@ -15,7 +16,7 @@ export const dynamic = "force-dynamic";
 const sanitizeText = (text) => {
   if (typeof text !== "string") return "";
   return xss(text, {
-    whiteList: {}, // Allow no tags
+    whiteList: {},
     stripIgnoreTag: true,
     stripIgnoreTagBody: ["script", "style", "iframe", "object", "embed"],
   }).trim();
@@ -52,19 +53,8 @@ export const POST = withErrorHandler(async (request) => {
     throw new AppError("Too many attempts. Please try again later.", 429);
   }
 
-  // 3. Payload size check (Max 10KB) to prevent database bloating
-  const rawText = await request.text();
-  const byteLength = new TextEncoder().encode(rawText).length;
-  if (byteLength > 10 * 1024) {
-    throw new AppError("Payload too large", 413);
-  }
-
-  let parsedBody;
-  try {
-    parsedBody = JSON.parse(rawText);
-  } catch (e) {
-    throw new ValidationError("Invalid JSON payload");
-  }
+  // 3. Payload size check & JSON parsing (Max 10KB)
+  const parsedBody = await parseJSON(request, 1024 * 10);
 
   // 4. Schema validation & input sanitization
   const validation = complaintSchema.safeParse(parsedBody);

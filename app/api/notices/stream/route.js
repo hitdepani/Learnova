@@ -111,7 +111,8 @@ export async function GET(request) {
         } catch (error) {
           console.error("Initial fetch error:", error);
           sendEvent("error", { message: "Failed to fetch initial notices" });
-          return controller.close();
+          cleanup();
+          return;
         }
 
         const onNotice = (doc) => {
@@ -144,6 +145,7 @@ export async function GET(request) {
 
         userStreams.set(userId, entry);
         connectionCount++;
+        request.signal.addEventListener("abort", cleanup);
 
         addListener(userId, onNotice);
         const hasStream = await getSharedStream();
@@ -180,10 +182,6 @@ export async function GET(request) {
         heartbeatInterval = setInterval(() => {
           sendEvent("ping", { time: new Date().toISOString() });
         }, 15000);
-
-        request.signal.addEventListener("abort", () => {
-          cleanup();
-        });
       },
     });
 

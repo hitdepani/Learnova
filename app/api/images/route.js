@@ -88,7 +88,23 @@ export const GET = withErrorHandler(async (request) => {
       throw new ValidationError("Image source not allowed");
     }
 
-    const imageResponse = await fetch(user.image);
+    const controller = new AbortController();
+    const IMAGE_FETCH_TIMEOUT_MS = 10000;
+    const timeoutId = setTimeout(() => controller.abort(), IMAGE_FETCH_TIMEOUT_MS);
+
+    const startTime = Date.now();
+    let imageResponse;
+    try {
+      imageResponse = await fetch(user.image, { signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    const elapsed = Date.now() - startTime;
+    if (elapsed > 2000) {
+      console.warn(`[Slow Image Fetch] ${elapsed}ms for ${user.image}`);
+    }
+
     if (!imageResponse.ok) {
       throw new AppError("Failed to fetch image", 502);
     }
@@ -98,9 +114,13 @@ export const GET = withErrorHandler(async (request) => {
       throw new AppError("Response is not an image", 502);
     }
 
-    const imageBuffer = await imageResponse.arrayBuffer();
+    const contentLength = parseInt(imageResponse.headers.get("content-length") || "0", 10);
+    const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+    if (contentLength > MAX_IMAGE_SIZE) {
+      throw new AppError("Image too large", 413);
+    }
 
-    return new NextResponse(imageBuffer, {
+    return new NextResponse(imageResponse.body, {
       status: 200,
       headers: {
         "Content-Type": contentType,
