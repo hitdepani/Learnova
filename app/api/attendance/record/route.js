@@ -2,6 +2,7 @@ import { jsonError, jsonSuccess } from "@/lib/api-response";
 import { withErrorHandler, authenticateRequest } from "@/lib/error-handler";
 import { initFirebaseAdmin, getUserProfile } from "@/lib/firebase-admin";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { awardXp } from "@/lib/gamification-service";
 
 export const POST = withErrorHandler(async (request) => {
   // 1. Secure token validation ensures only logged-in users can ping this route
@@ -47,6 +48,15 @@ export const POST = withErrorHandler(async (request) => {
       },
       { merge: true },
     );
+
+  // Gamification is a side effect — failures must not block attendance recording
+  try {
+    await awardXp(userId, "attendance_marked", {
+      attendanceHour: new Date().getHours(),
+    });
+  } catch (_) {
+    // Silently swallow — attendance record is already saved
+  }
 
   return jsonSuccess({ alreadyRecorded: false }, 201);
 });
