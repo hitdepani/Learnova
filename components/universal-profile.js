@@ -280,24 +280,45 @@ export default function UniversalProfile() {
 
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error(
-        "Please upload a valid image file."
-      );
-      return;
+   
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  if (!allowedTypes.includes(file.type)) {
+    toast.error("Invalid file type. Only JPG, PNG, WEBP are allowed.");
+    e.target.value = "";
+    return;
+  }
+
+  const MAX_SIZE = 2 * 1024 * 1024;
+
+  if (file.size > MAX_SIZE) {
+    toast.error("File size exceeds 2MB. Please select a smaller file.");
+    e.target.value = "";
+    return;
+  }
+
+  const loadingToast = toast.loading("Uploading profile picture...");
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+      const res = await fetch("/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+
+      toast.success("Uploaded!");
+      e.target.value = ""; 
+    } catch (error) {
+      toast.error("Upload failed!");
+    } finally {
+      toast.dismiss(loadingToast);
     }
-
-    const MAX_SIZE = 5 * 1024 * 1024;
-
-    if (file.size > MAX_SIZE) {
-      toast.error(
-        "File size exceeds 5MB limit."
-      );
-
-      e.target.value = "";
-
-      return;
-    }
+   
 
     // Show preview before uploading
     const objectUrl = URL.createObjectURL(file);
@@ -985,4 +1006,5 @@ export default function UniversalProfile() {
       </div>
     </div>
   );
+};
 }

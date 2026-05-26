@@ -99,6 +99,8 @@ setRecentActivity(mapped);
   }, [user]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchGamification = async () => {
       try {
         if (!user) return;
@@ -111,6 +113,7 @@ setRecentActivity(mapped);
             headers: {
               Authorization: `Bearer ${token}`,
             },
+            signal: controller.signal,
           }
         );
 
@@ -119,6 +122,7 @@ setRecentActivity(mapped);
           setGamificationData(data);
         }
       } catch (err) {
+        if (err.name === "AbortError") return;
         console.error(
           "Failed to load gamification data",
           err
@@ -127,6 +131,10 @@ setRecentActivity(mapped);
     };
 
     fetchGamification();
+
+    return () => {
+      controller.abort();
+    };
   }, [user]);
 
   // Attendance stats

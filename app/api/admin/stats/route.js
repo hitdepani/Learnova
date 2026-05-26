@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { withErrorHandler } from "@/lib/error-handler";
 import { requireRole } from "@/lib/rbac";
 import admin from "firebase-admin";
+import {
+  DEFAULT_SYSTEM_METRICS,
+  DEFAULT_CRITICAL_ALERTS,
+  DEFAULT_FEATURE_USAGE,
+} from "@/constants/adminMockData";
 
 export const dynamic = "force-dynamic";
 
@@ -12,9 +17,9 @@ export const GET = withErrorHandler(async (request) => {
 
   let totalUsers = 0;
   let institutes = [];
-  let systemMetrics = null;
-  let criticalAlerts = [];
-  let featureUsage = null;
+  let systemMetrics = DEFAULT_SYSTEM_METRICS;
+  let criticalAlerts = DEFAULT_CRITICAL_ALERTS;
+  let featureUsage = DEFAULT_FEATURE_USAGE;
 
   try {
     const usersCountSnap = await db.collection("users").count().get();

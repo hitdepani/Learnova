@@ -368,6 +368,34 @@ export function Navbar() {
                       className={iconBtn}
                       aria-label="Notifications"
                     >
+
+                      <Bell className="h-5 w-5" />
+                      {unreadCount > 0 && <span className="absolute top-2 right-2 bg-red-500 rounded-full h-2 w-2" />}
+                    </button>
+
+                    {isNotificationOpen && (
+                      <div className="absolute right-0 mt-3 w-72 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl z-[80] overflow-hidden">
+                        <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50">
+                          <h3 className="text-zinc-900 dark:text-zinc-100 font-bold text-sm">Notifications</h3>
+                          {unreadCount > 0 && (
+                            <button onClick={markAllAsRead} aria-label="Mark all notifications as read" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                              Mark all as read
+                            </button>
+                          )}
+                        </div>
+                        <div className="max-h-60 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-900">
+                          {notifications.length === 0 ? (
+                            <div className="p-4 text-center text-sm text-zinc-400">No new notices</div>
+                          ) : (
+                            notifications.map((n) => (
+                              <div key={n.id} onClick={() => markAsRead(n.id)} className={`p-3 text-left cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/40 ${!n.read ? "bg-blue-50/30" : ""}`}>
+                                <p className="text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2">{n.message}</p>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
                       <Bell className="h-[18px] w-[18px]" />
                       <AnimatePresence>
                         {unreadCount > 0 && (
@@ -413,6 +441,7 @@ export function Navbar() {
                         </motion.div>
                       )}
                     </AnimatePresence>
+
                   </div>
 
                   {/* Profile Dropdown */}
@@ -446,6 +475,24 @@ export function Navbar() {
                         )}
                         <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 bg-emerald-400 rounded-full ring-2 ring-white dark:ring-zinc-950" />
                       </div>
+
+                      <ChevronDown className="h-4 w-4 text-zinc-400" />
+                    </button>
+
+                    {isDropdownOpen && (
+                      <div className="absolute right-0 mt-3 w-48 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl py-1 z-[80]">
+                        {userMenuItems.map((item) => (
+                          <Link key={item.key} href={item.href} onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors">
+                            <item.icon className="h-4 w-4 mr-2.5 text-zinc-400" /> {item.label}
+                          </Link>
+                        ))}
+                        <hr className="my-1 border-zinc-100 dark:border-zinc-900" />
+                        <button onClick={handleLogout} aria-label="Logout" className="w-full flex items-center px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors">
+                          <LogOut className="h-4 w-4 mr-2.5" /> Logout
+                        </button>
+                      </div>
+                    )}
+
                       <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200 hidden md:inline max-w-[80px] truncate">
                         {getUserDisplayName().split(" ")[0]}
                       </span>
@@ -496,6 +543,7 @@ export function Navbar() {
                         </motion.div>
                       )}
                     </AnimatePresence>
+
                   </div>
                 </div>
               ) : (
