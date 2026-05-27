@@ -22,18 +22,30 @@ const syncSchema = z.object({
   ).min(1),
 });
 
+// Minimum face-match confidence required to record attendance.
+// Must stay in sync with the threshold enforced in app/api/attendance/record/route.js.
+const MIN_CONFIDENCE_THRESHOLD = 0.6;
+
 export function normalizeConfidenceScore(confidenceScore) {
   let parsedScore = Number(confidenceScore);
 
   if (!Number.isFinite(parsedScore)) {
-    return 0;
+    return null;
   }
 
+  // Accept both percentage form (60-100) and decimal form (0.0-1.0)
   if (parsedScore > 1) {
     parsedScore = parsedScore / 100;
   }
 
-  return Math.max(0, Math.min(1, parsedScore));
+  const clamped = Math.max(0, Math.min(1, parsedScore));
+
+  // Reject scores below the same threshold applied in the online attendance path
+  if (clamped < MIN_CONFIDENCE_THRESHOLD) {
+    return null;
+  }
+
+  return clamped;
 }
 
 function resolveAttendanceIdentity(decodedToken, userProfile) {
@@ -108,6 +120,16 @@ async function handleSync(request) {
       continue;
     }
 
+    // Reject records whose face-match confidence is below the minimum threshold.
+    // The online attendance path enforces >= 60%; offline sync must apply the same guard.
+    const normalizedConfidence = normalizeConfidenceScore(record.confidenceScore);
+    if (normalizedConfidence === null) {
+      console.warn(
+        `User ${decodedToken.uid} submitted offline attendance with confidence below threshold (raw: ${record.confidenceScore})`,
+      );
+      continue;
+    }
+
     // Atomic check-and-set using a Firestore transaction to prevent
     // duplicate records under concurrent sync requests from multiple tabs or devices.
     const newDocRef = db.collection("attendance_records").doc(`${decodedToken.uid}_${recordDate}`);
@@ -135,7 +157,7 @@ async function handleSync(request) {
         timestamp: FieldValue.serverTimestamp(),
         date: recordDate,
         status: "present",
-        confidenceScore: normalizeConfidenceScore(record.confidenceScore),
+        confidenceScore: normalizedConfidence,
         offlineSynced: true,
         queuedAt: new Date(record.queuedAt),
       });

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import admin from "firebase-admin";
-import { initializeFirebase } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import { requireRole } from "@/lib/rbac";
 import { withErrorHandler, parseJSON } from "@/lib/error-handler";
 import { z } from "zod";
@@ -21,7 +20,6 @@ const noticeSchema = z.object({
 async function publishNotice(request) {
   const allowedRoles = ["teacher", "admin", "staff"];
   const { payload: decodedToken, profile } = await requireRole(request, allowedRoles);
-  initializeFirebase();
 
   const body = await parseJSON(request, 1024 * 50);
   const validData = noticeSchema.parse(body);
@@ -35,8 +33,7 @@ async function publishNotice(request) {
     updatedAt: new Date(),
   };
 
-  const result = await admin
-    .firestore()
+  const result = await adminDb
     .collection("notices")
     .add(newNotice);
 

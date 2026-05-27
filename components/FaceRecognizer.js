@@ -159,6 +159,8 @@ export default function FaceRecognizer({ authUser }) {
   };
 
   useEffect(() => {
+    isMounted.current = true;
+
     const loadModels = async () => {
       try {
         if (!isMounted.current) return;

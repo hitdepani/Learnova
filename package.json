@@ -66,6 +66,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.1.7",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
