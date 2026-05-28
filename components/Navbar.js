@@ -10,7 +10,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { useTheme } from "next-themes";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import ThemeToggle from "@/components/ThemeToggle";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 import {
   Menu,
