@@ -3,6 +3,7 @@ import SkeletonCard from "../ui/SkeletonCard";
 import EmptyState from "../ui/EmptyState";
 import CircularProgress from "../ui/CircularProgress";
 import StreakTracker from "../ui/StreakTracker";
+import Image from "next/image";
 
 /**
  * Mock data representing courses / AI-generated content
@@ -186,10 +187,12 @@ const Dashboard = () => {
                   {/* Footer Area */}
                   <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 dark:border-slate-800/60">
                     <div className="flex items-center space-x-2">
-                      <img
+                      <Image
                         src={course.author.avatar}
                         alt={course.author.name}
-                        className="w-8 h-8 rounded-full object-cover border border-slate-100 dark:border-slate-800"
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover border border-slate-100 dark:border-slate-800"
                       />
                       <div className="flex flex-col">
                         <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">

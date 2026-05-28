@@ -399,11 +399,13 @@ setEmailSuggestion(null);
                     </div>
 
                     {registeredUser._id && registeredUserImageUrl && (
-                      <div className="mt-6">
-                        <img
+                      <div className="mt-6 relative w-full h-64">
+                        <NextImage
                           src={registeredUserImageUrl}
                           alt={`${registeredUser.name}'s photo`}
-                          className="w-full h-auto rounded-xl shadow-lg border border-white/10"
+                          fill
+                          unoptimized
+                          className="rounded-xl shadow-lg border border-white/10 object-cover"
                         />
                       </div>
                     )}
