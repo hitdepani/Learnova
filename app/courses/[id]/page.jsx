@@ -12,6 +12,7 @@ import {
   PlayCircle
 } from "lucide-react";
 import ShareButton from "@/components/ui/ShareButton";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 import ReadingTimeBadge from "@/components/ui/ReadingTimeBadge";
 import toast from "react-hot-toast";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
@@ -90,6 +91,15 @@ export default function CourseDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {/* Breadcrumb Navigation */}
+          <Breadcrumb
+            paths={[
+              { name: "Home", url: "/" },
+              { name: "Courses", url: "/courses" },
+              { name: course.title, url: `/courses/${course.id}` },
+            ]}
+          />
+
           {/* Badge & Course Header */}
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
