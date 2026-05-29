@@ -645,7 +645,7 @@ export function Navbar() {
                       key={item.key}
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition ...`}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-colors duration-200 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800`}
 
                     >
                       <item.icon className="h-4 w-4 text-zinc-400" />
